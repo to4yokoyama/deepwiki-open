@@ -6,6 +6,8 @@
       "./env/", 
       "./virtualenv/",
       "./node_modules/", 
+      "./vendor/", 
+      "./storage/", 
       "./bower_components/", 
       "./jspm_packages/",
       "./.git/", 
