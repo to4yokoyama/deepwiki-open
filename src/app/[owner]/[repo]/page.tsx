@@ -1349,15 +1349,46 @@ IMPORTANT:
 
                 // Define common categories that might appear in page titles
                 const categories = [
-                  { id: 'overview', title: 'Overview', keywords: ['overview', 'introduction', 'about'] },
-                  { id: 'architecture', title: 'Architecture', keywords: ['architecture', 'structure', 'design', 'system'] },
-                  { id: 'features', title: 'Core Features', keywords: ['feature', 'functionality', 'core'] },
-                  { id: 'components', title: 'Components', keywords: ['component', 'module', 'widget'] },
-                  { id: 'api', title: 'API', keywords: ['api', 'endpoint', 'service', 'server'] },
-                  { id: 'data', title: 'Data Flow', keywords: ['data', 'flow', 'pipeline', 'storage'] },
-                  { id: 'models', title: 'Models', keywords: ['model', 'ai', 'ml', 'integration'] },
-                  { id: 'ui', title: 'User Interface', keywords: ['ui', 'interface', 'frontend', 'page'] },
-                  { id: 'setup', title: 'Setup & Configuration', keywords: ['setup', 'config', 'installation', 'deploy'] }
+                  {
+                    id: 'system-overview',
+                    title: 'System Overview',
+                    keywords: ['overview', 'system overview', 'introduction', 'architecture', 'system diagram']
+                  },
+                  {
+                    id: 'function-list',
+                    title: 'Function List',
+                    keywords: ['function list', 'feature list', 'functions', 'features']
+                  },
+                  {
+                    id: 'function-details',
+                    title: 'Function Details',
+                    keywords: ['function details', 'feature details', 'implementation', 'logic']
+                  },
+                  {
+                    id: 'use-cases',
+                    title: 'Use Cases',
+                    keywords: ['use case', 'usage scenario', 'user story', 'purpose']
+                  },
+                  {
+                    id: 'screens',
+                    title: 'Screens',
+                    keywords: ['screen', 'ui', 'page', 'mock-up', 'wireframe']
+                  },
+                  {
+                    id: 'screen-flow',
+                    title: 'Screen Flow',
+                    keywords: ['screen flow', 'navigation', 'transition', 'flowchart']
+                  },
+                  {
+                    id: 'screen-field-specs',
+                    title: 'Screen Field Specifications',
+                    keywords: ['field spec', 'input field', 'validation', 'form field', 'constraint']
+                  },
+                  {
+                    id: 'reports',
+                    title: 'Reports',
+                    keywords: ['report', 'pdf', 'csv', 'export', 'statement']
+                  }
                 ];
 
                 // Initialize clusters with empty arrays
