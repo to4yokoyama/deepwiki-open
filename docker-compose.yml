@@ -14,3 +14,27 @@ services:
       - SERVER_BASE_URL=http://localhost:${PORT:-8001}
     volumes:
       - ~/.adalflow:/root/.adalflow  # Persist repository and embedding data
+  ollama:
+      image: ollama/ollama:latest
+      ports:
+        - "11434:11434"
+      volumes:
+        - $HOME/.ollama/.ollama:/root/.ollama
+      deploy:
+        resources:
+          reservations:
+            devices:
+              - driver: nvidia
+                count: all
+                capabilities: [gpu]
+      environment:
+        - OLLAMA_NUM_PARALLEL=1
+        - OLLAMA_KEEP_ALIVE=0
+        - OLLAMA_DEBUG=0
+      restart: unless-stopped
+      runtime: nvidia
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "10m"
+          max-file: "3"
