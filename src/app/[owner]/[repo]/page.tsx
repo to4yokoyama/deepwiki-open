@@ -533,6 +533,8 @@ When designing the wiki structure, include pages that would benefit from visual 
 - State machines
 - Class hierarchies
 
+If the repository contains multiple distinct functions, components, or modules, aim to create a separate wiki page for the detailed explanation of each significant one. For instance, instead of a single 'Function Details' page listing several functions, prefer individual pages like 'Details of Function A', 'Details of Module B', etc.
+
 ${isComprehensiveView ? `
 Create a structured wiki with the following main sections:
 - Overview (general information about the project)
@@ -1403,25 +1405,46 @@ IMPORTANT:
                 pages.forEach((page: WikiPage) => {
                   const title = page.title.toLowerCase();
                   let assigned = false;
+                  const functionDetailsCategory = categories.find(c => c.id === 'function-details');
 
-                  // Try to find a matching category
-                  for (const category of categories) {
-                    if (category.keywords.some(keyword => title.includes(keyword))) {
-                      pageClusters.get(category.id)?.push(page);
-                      assigned = true;
-                      break;
+                  // Check if the page matches 'function-details' keywords
+                  if (functionDetailsCategory && functionDetailsCategory.keywords.some(keyword => title.includes(keyword))) {
+                    // Create a unique section for this function detail page
+                    const uniqueSectionId = `section-func-detail-${page.id}`;
+                    sections.push({
+                      id: uniqueSectionId,
+                      title: page.title, // Use page title as section title
+                      pages: [page.id],
+                    });
+                    rootSections.push(uniqueSectionId);
+                    page.parentId = uniqueSectionId;
+                    assigned = true; // Mark as assigned to prevent going into "Other"
+                  } else {
+                    // Try to find a matching category for other pages
+                    for (const category of categories) {
+                      // Skip function-details category here as it's handled above
+                      if (category.id === 'function-details') continue;
+
+                      if (category.keywords.some(keyword => title.includes(keyword))) {
+                        pageClusters.get(category.id)?.push(page);
+                        assigned = true;
+                        break;
+                      }
                     }
                   }
 
-                  // If no category matched, put in "Other"
+                  // If no category matched (and not a function-detail page)
                   if (!assigned) {
                     pageClusters.get('other')?.push(page);
                   }
                 });
 
-                // Create sections for non-empty categories
+                // Create sections for non-empty categories from pageClusters
                 for (const [categoryId, categoryPages] of pageClusters.entries()) {
                   if (categoryPages.length > 0) {
+                    // Skip 'function-details' cluster if it somehow got populated
+                    if (categoryId === 'function-details') continue;
+
                     const category = categories.find(c => c.id === categoryId) ||
                                     { id: categoryId, title: categoryId === 'other' ? 'Other' : categoryId.charAt(0).toUpperCase() + categoryId.slice(1) };
 
@@ -1433,44 +1456,43 @@ IMPORTANT:
                     });
                     rootSections.push(sectionId);
 
-                    // Update page parentId
+                    // Update page parentId for pages in these cluster-based sections
                     categoryPages.forEach((page: WikiPage) => {
                       page.parentId = sectionId;
                     });
                   }
                 }
 
-                // If we still have no sections (unlikely), fall back to importance-based grouping
-                if (sections.length === 0) {
-                  const highImportancePages = pages.filter((p: WikiPage) => p.importance === 'high').map((p: WikiPage) => p.id);
-                  const mediumImportancePages = pages.filter((p: WikiPage) => p.importance === 'medium').map((p: WikiPage) => p.id);
-                  const lowImportancePages = pages.filter((p: WikiPage) => p.importance === 'low').map((p: WikiPage) => p.id);
+                // If we still have no sections (e.g. only function-detail pages processed or all pages went to 'other' which might be empty)
+                // and rootSections is empty, fall back to importance-based grouping for pages not yet assigned a parent.
+                // This part might need adjustment if all pages are function-detail pages.
+                if (rootSections.length === 0 && pages.length > 0) { // Check rootSections instead of sections directly
+                  // This fallback might only apply if NO pages were categorized, including function-details or 'other'
+                  const unparentedPages = pages.filter(p => !p.parentId);
+
+                  const highImportancePages = unparentedPages.filter((p: WikiPage) => p.importance === 'high').map((p: WikiPage) => p.id);
+                  const mediumImportancePages = unparentedPages.filter((p: WikiPage) => p.importance === 'medium').map((p: WikiPage) => p.id);
+                  const lowImportancePages = unparentedPages.filter((p: WikiPage) => p.importance === 'low').map((p: WikiPage) => p.id);
 
                   if (highImportancePages.length > 0) {
-                    sections.push({
-                      id: 'section-high',
-                      title: 'Core Components',
-                      pages: highImportancePages
-                    });
-                    rootSections.push('section-high');
+                    const sectionId = 'section-high';
+                    sections.push({ id: sectionId, title: 'Core Components', pages: highImportancePages });
+                    rootSections.push(sectionId);
+                    unparentedPages.filter(p => p.importance === 'high').forEach(p => p.parentId = sectionId);
                   }
 
                   if (mediumImportancePages.length > 0) {
-                    sections.push({
-                      id: 'section-medium',
-                      title: 'Key Features',
-                      pages: mediumImportancePages
-                    });
-                    rootSections.push('section-medium');
+                    const sectionId = 'section-medium';
+                    sections.push({ id: sectionId, title: 'Key Features', pages: mediumImportancePages });
+                    rootSections.push(sectionId);
+                    unparentedPages.filter(p => p.importance === 'medium').forEach(p => p.parentId = sectionId);
                   }
 
                   if (lowImportancePages.length > 0) {
-                    sections.push({
-                      id: 'section-low',
-                      title: 'Additional Information',
-                      pages: lowImportancePages
-                    });
-                    rootSections.push('section-low');
+                    const sectionId = 'section-low';
+                    sections.push({ id: sectionId, title: 'Additional Information', pages: lowImportancePages });
+                    rootSections.push(sectionId);
+                    unparentedPages.filter(p => p.importance === 'low').forEach(p => p.parentId = sectionId);
                   }
                 }
 
